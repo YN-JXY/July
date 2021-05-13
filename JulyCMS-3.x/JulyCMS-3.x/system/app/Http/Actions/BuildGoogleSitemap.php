@@ -3,11 +3,13 @@
 namespace App\Http\Actions;
 
 use App\Support\Html;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use July\Node\Catalog;
 use July\Node\NodeField;
+use SebastianBergmann\Environment\Console;
 use Specs\Spec;
 
 class BuildGoogleSitemap extends ActionBase
@@ -19,14 +21,18 @@ class BuildGoogleSitemap extends ActionBase
     public function __invoke(Request $request)
     {
         $urls = [];
-
         // 节点网址
         $aliases = NodeField::find('url')->getValueModel()->values();
+        foreach ($aliases as $key => $value) {
+            unset($aliases[$key]);
+            $aliases[substr($key,0,strrpos($key,"/"))] = $value;
+        }
         foreach (Catalog::default()->get_nodes() as $node) {
             $url = $aliases[$node->getKey()] ?? null;
             if (!$url || $url === '/404.html') {
                 continue;
             }
+
             $urls[$url] = $node->fetchHtml();
         }
 
@@ -36,11 +42,11 @@ class BuildGoogleSitemap extends ActionBase
                 $urls['/specs/'.$spec->getKey().'/records/'.$record['id']] = null;
             }
         }
-
         // 生成谷歌站点地图
         Storage::disk('public')->put('sitemap.xml', $this->render($urls));
 
         return response('');
+
     }
 
     /**
