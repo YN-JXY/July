@@ -25,10 +25,17 @@
           <td>
             <div class="jc-operaters">
               @if ($langcode === $original_langcode)
+              <a href="{{ $models[$content_id]['url'] }}" target="_blank" title="预览页面" class="md-button md-fab md-dense md-primary md-theme-default">
+                <div class="md-ripple"><div class="md-button-content"><i class="md-icon md-icon-font md-theme-default">visibility</i></div></div>
+              </a>
+
               <a href="{{ short_url($edit_route, [$content_id]) }}" title="编辑" class="md-button md-fab md-mini md-light-primary md-theme-default">
                 <div class="md-ripple"><div class="md-button-content"><i class="md-icon md-icon-font md-theme-default">edit</i></div></div>
               </a>
               @else
+              <a href="{{'/'.$langcode.$models[$content_id]['url']}}" target="_blank" title="预览页面" class="md-button md-fab md-dense md-primary md-theme-default">
+                <div class="md-ripple"><div class="md-button-content"><i class="md-icon md-icon-font md-theme-default">visibility</i></div></div>
+              </a>
               <a href="{{ short_url($translate_route, [$content_id, $langcode]) }}" title="翻译" class="md-button md-fab md-mini md-light-primary md-theme-default">
                 <div class="md-ripple"><div class="md-button-content"><i class="md-icon md-icon-font md-theme-default">translate</i></div></div>
               </a>
