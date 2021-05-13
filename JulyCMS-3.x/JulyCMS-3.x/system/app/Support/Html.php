@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Log;
+
 class Html
 {
     /**
@@ -50,6 +52,19 @@ class Html
         return $this->extract('/src="(\/[^"]*?\.(?:jpg|jpeg|gif|png|webp))"/');
     }
 
+    // 提取视频链接
+    public function extractMpLinks()
+    {
+        return $this->extract('/src="(\/[^"]*?\.mp4)"/');
+    }
+
+    // 提取视频标题
+    public function extractMpTitleLinks()
+    {   
+        $matches = [];
+        preg_match_all('/\/>(.*?)<\/video>/',$this->html,$matches,PREG_PATTERN_ORDER);
+        return $matches[1];  
+    }
     /**
      * 提取 PDF 链接
      *
@@ -72,20 +87,8 @@ class Html
         if (! $this->html) {
             return [];
         }
-
         preg_match_all($pattern, $this->html, $matches, PREG_PATTERN_ORDER);
         return array_values(array_unique($matches[$capture]));
-    }
-
-    /**
-     * 压缩 html
-     *
-     * @param  string $html
-     * @return string
-     */
-    public static function compress(string $html)
-    {
-        return preg_replace('/>\n\s+/', ">\n", trim($html));
     }
 
     public function __toString()

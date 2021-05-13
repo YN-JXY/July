@@ -82,8 +82,24 @@ class BuildGoogleSitemap extends ActionBase
             foreach ($content->extractImageLinks() as $img) {
                 $images[$home.'/'.ltrim($img, '\\/')] = null;
             }
+
+            // 提取mp4文件
+            $videos = [];
+            $video = [];
+            $key = 0;
+            foreach ($content->extractMpLinks() as $mp4) {
+                $video[$key] = $home.'/'.ltrim($mp4, '\\/');
+                $key++;
+            }
+
+            $video_title = $content->extractMpTitleLinks();
+            for ($i=0; $i < $key; $i++) {
+                $videos[$video_title[$i]] = $video[$i];
+            }
+
             $data['urls'][$home.'/'.$url] = [
                 'images' => $images,
+                'videos' => $videos,
             ];
 
             // 提取 PDF
