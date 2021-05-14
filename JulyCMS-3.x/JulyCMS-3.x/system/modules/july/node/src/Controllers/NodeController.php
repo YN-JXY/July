@@ -200,6 +200,7 @@ class NodeController extends Controller
         if (! config('lang.multiple')) {
             abort(404);
         }
+
         return view('languages', [
             'models' => Node::indexWith(['url'])->all(),
             'original_langcode' => $node->getOriginalLangcode(),
@@ -218,17 +219,16 @@ class NodeController extends Controller
      */
     public function render(Request $request)
     {
-        $nodes = NodeSet::fetchAll();
         if ($ids = $request->input('nodes')) {
             $nodes = NodeSet::fetch($ids);
+        } else {
+            $nodes = NodeSet::fetchAll();
         }
 
+        $frontendLangcode = langcode('frontend');
+
         // 多语言生成
-        if (config('lang.multiple')) {
-            $langs = Lang::getAccessibleLangcodes();
-        } else {
-            $langs = [langcode('frontend')];
-        }
+        $langs = config('lang.multiple') ? Lang::getAccessibleLangcodes() : [];
 
         /** @var \Twig\Environment */
         $twig = app('twig');
@@ -236,16 +236,29 @@ class NodeController extends Controller
         $success = [];
         foreach ($nodes as $node) {
             $result = [];
-            foreach ($langs as $langcode) {
-                try {
-                    $node->translateTo($langcode)->render($twig);
-                    $result[$langcode] = true;
-                } catch (\Throwable $th) {
-                    $result[$langcode] = false;
-                    Log::error($th->getMessage());
+
+            try {
+                $node->translateTo($frontendLangcode)->render($twig);
+            } catch (\Throwable $th) {
+                $result['_default'] = false;
+
+                Log::error($th->getMessage());
+            }
+
+            if ($langs) {
+                foreach ($langs as $langcode) {
+                    try {
+                        $node->translateTo($langcode)->render($twig, $langcode);
+                        $result[$langcode] = true;
+                    } catch (\Throwable $th) {
+                        $result[$langcode] = false;
+
+                        Log::error($th->getMessage());
+                    }
                 }
             }
-            $success[$node->id] = $result;
+
+            $success[$node->url] = $result;
         }
 
         return response($success);
