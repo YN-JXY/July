@@ -5,6 +5,7 @@ namespace July\Message\Controllers;
 use App\EntityField\FieldBase;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use July\Message\MessageField;
 use July\Message\MessageForm;
@@ -41,6 +42,7 @@ class MessageFormController extends Controller
      */
     public function edit(MessageForm $form)
     {
+
         $data = $this->getCreationContext();
         $data['model'] = $form->gather();
 
@@ -50,7 +52,6 @@ class MessageFormController extends Controller
         $data['context']['fields'] = $fields->sortBy('delta')->keyBy('id')->all();
 
         $data['context']['mode'] = 'edit';
-
         return view('message::form.create-edit', $data);
     }
 
@@ -89,7 +90,25 @@ class MessageFormController extends Controller
     {
         // 创建类型
         MessageForm::create($request->all());
+        $form = $_SERVER['DOCUMENT_ROOT'].'/themes/frontend/template/message/form';
+        $content = $_SERVER['DOCUMENT_ROOT'].'/themes/frontend/template/message/content';
+        if (!is_dir( $form )) {
+            mkdir($form,0777,true);
+        }
+        if (!is_dir( $content )) {
+            mkdir($content,0777,true);
+        }
+        fopen($form."/". $request->id.".twig", "w");
+        fopen($content."/".$request->id.".twig", "w");
 
+        $email = DB::table('message_field_message_form')->select('field_id')->where('mold_id',$request->id)->get();
+
+        $content_value = "";
+        foreach ($email as $key => $value) {
+           $content_value.="{{fields.".$value->field_id.".label}}:{{fields.".$value->field_id.".value}}\n";
+        }
+        $content_values = "\nIPLocation: {{ message.location }}\nIP: {{ message.ip }}\nUser Agent: {{ message.user_agent }}\nTrails:\n{% for trail in message.trails %}\n{{ trail }}\n{% endfor %}";
+        file_put_contents($content."/".$request->id.".twig", $content_value.$content_values);
         return response('');
     }
 
