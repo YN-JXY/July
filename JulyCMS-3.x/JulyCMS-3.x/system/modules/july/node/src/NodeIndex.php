@@ -4,6 +4,7 @@ namespace July\Node;
 
 use App\Models\ModelBase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NodeIndex extends ModelBase
 {
@@ -56,6 +57,7 @@ class NodeIndex extends ModelBase
             ]);
         });
 
+
         // 索引其它字段
         NodeField::searchable()->each(function (NodeField $field) {
             foreach (static::extractValueIndex($field) as $record) {
@@ -82,6 +84,7 @@ class NodeIndex extends ModelBase
         $fieldId = $field->getKey();
         $fieldType = $field->getFieldType();
         $weight = $field->weight;
+
         foreach ($field->getValueRecords() as $record) {
             $values[] = [
                 'entity_id' => $record['entity_id'],
@@ -103,6 +106,8 @@ class NodeIndex extends ModelBase
      */
     public static function search($keywords)
     {
+        $key = $keywords;
+
         if (empty($keywords)) {
             return [
                 'keywords' => $keywords,
@@ -113,9 +118,11 @@ class NodeIndex extends ModelBase
         // 处理关键词
         $keywords = static::normalizeKeywords($keywords);
 
+
         // 获取搜索结果
         $results = [];
         foreach (static::searchIndex($keywords) as $result) {
+
             $node_id = $result->entity_id;
             $field_id = $result->field_id;
 
@@ -126,6 +133,16 @@ class NodeIndex extends ModelBase
                     'weight' => 0,
                 ];
             }
+            $str = DB::table('node__h1')->where('entity_id',$node_id)->value('h1');
+
+            if(stripos($str,$key)!== false){
+                $index =  stripos($str,$key);
+                $length = mb_strlen($key);
+
+                $abs =  substr($str,$index,$length);
+                $results[$node_id]['h1'] = str_ireplace($key,"<span class= \"keyword\">".$abs."</span>" , $str);
+            }
+
             $results[$node_id][$field_id] =  $result['content'];
             $results[$node_id]['weight'] +=  $result['weight'];
         }
@@ -138,7 +155,6 @@ class NodeIndex extends ModelBase
             SORT_NUMERIC,
             $results
         );
-
         return [
             'keywords' => key($keywords),
             'results' => $results,
@@ -159,12 +175,13 @@ class NodeIndex extends ModelBase
             $conditions[] = ['content', 'like', '%'.$keyword.'%', 'or'];
         }
 
-        return static::query()
-            ->where('langcode', langcode('frontend'))
-            ->where(function ($query) use ($conditions) {
-                $query->where($conditions);
-            })
-            ->get();
+        $values = static::query()
+        ->where('langcode', langcode('frontend'))
+        ->where(function ($query) use ($conditions) {
+            $query->where($conditions);
+        })
+        ->get();
+        return $values;
     }
 
     /**
@@ -187,7 +204,6 @@ class NodeIndex extends ModelBase
         $keywords = array_slice($keywords, 0, 10);
         $keywords = static::combineKeywords($keywords);
         arsort($keywords);
-
         return $keywords;
     }
 
