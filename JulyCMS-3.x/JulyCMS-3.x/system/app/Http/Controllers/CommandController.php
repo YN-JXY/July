@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Database\Seeds\SeederBase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use July\Node\Node;
@@ -53,24 +55,15 @@ class CommandController extends Controller
         foreach (NodeField::all() as $field) {
             $results = array_merge($results, $field->searchValue($keywords));
         }
-
-        $titles = [];
-        foreach (NodeField::carry('title')->getRecords() as $record) {
-            $key = $record->node_id.'/'.$record->langcode;
-            $titles[$key] = $record->title_value;
-        }
-
-        $nodes = Node::carryAll()->keyBy('id');
         foreach ($results as &$result) {
-            $key = $result['node_id'].'/'.$result['langcode'];
-            $result['node_title'] = $titles[$key] ?? null;
-            $result['original_langcode'] = $nodes->get($result['node_id'])->langcode;
+            $result['title'] = DB::table('node_index')->where('entity_id',$result['entity_id'])->where('field_id','title')->value('content');
+            $result['Type'] = DB::table('nodes')->where('title',$result['title'])->value('mold_id');
+            $result['src'] = '/manage/nodes/'.$result['entity_id'].'/edit';
         }
 
         return view('search', [
             'keywords' => $keywords,
             'results' => $results,
-            'langcode' => langcode('content'),
         ]);
     }
 }
