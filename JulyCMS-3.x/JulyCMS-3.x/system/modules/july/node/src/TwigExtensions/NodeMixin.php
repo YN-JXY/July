@@ -2,10 +2,12 @@
 
 namespace July\Node\TwigExtensions;
 
+use Illuminate\Support\Facades\Log;
 use July\Node\Catalog;
 use July\Node\CatalogSet;
 use July\Node\NodeSet;
 use July\Node\NodeTypeSet;
+use PhpParser\Node\Expr\Cast\Array_;
 
 class NodeMixin
 {
@@ -78,6 +80,7 @@ class NodeMixin
     public function in_path()
     {
         return function($node_id) {
+
             if (is_object($node_id) && ($node_id instanceof \July\Node\Node)) {
                 $node_id = $node_id->getKey();
             }
@@ -86,15 +89,21 @@ class NodeMixin
             }
             $node_id = intval($node_id);
 
+
             /** @var \App\Support\JustInTwig */
             $jit = $this;
 
             $path = $jit->getGlobal('_path');
+            if($path !== null){
+                $abs = [];
+                preg_match('/\[(.*?)\]/',$path,$abs);
+                $path = explode(',',$abs[1]);
+            }
             if (!is_array($path)) {
                 return false;
             }
-
             $current = $jit->getGlobal('_node');
+
             if (!$current || !($current instanceof \July\Node\Node)) {
                 return false;
             }
