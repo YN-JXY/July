@@ -500,7 +500,7 @@ body {
   justify-content: space-between;
   padding: 30px 40px 24px;
   background-color: #edede8;
-  display: none;
+  position: sticky;
 }
 
 #main_header > h1 {
@@ -1419,7 +1419,7 @@ h2.jc-form-info-item {
 
 .catalog-tree__recycle > .el-tree-node__children .el-tree-node__label > span {
   display: block;
-  max-width: 300px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

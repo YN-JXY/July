@@ -2,7 +2,7 @@
 /* element ui 样式修正 */
 
 .el-form-item.has-helptext + .el-form-item {
-  margin-top: 36px;
+  margin-top: 5px;
 }
 
 .el-form--label-top .el-form-item__label {
@@ -79,13 +79,13 @@
 }
 
 .el-form-item__content > .jc-form-item-help {
-  position: absolute;
   top: 100%;
   left: 0;
   height: 22px;
   line-height: 22px;
   font-size: 12px;
   color: #757575;
+  display: block;
 }
 
 .is-error > .el-form-item__content > .jc-form-item-help {
