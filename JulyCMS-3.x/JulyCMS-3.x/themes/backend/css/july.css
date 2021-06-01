@@ -500,6 +500,7 @@ body {
   justify-content: space-between;
   padding: 30px 40px 24px;
   background-color: #edede8;
+  display: none;
 }
 
 #main_header > h1 {
@@ -524,8 +525,9 @@ body {
 
 #main_content {
   flex: 1;
-  padding: 20px 40px 40px;
+  padding: 10px 40px 40px;
   /* border-top: 1px solid #bfbfbf; */
+  position: relative;
 }
 
 #main_form {
@@ -951,6 +953,14 @@ h2.jc-form-info-item {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
+      width: 100%;
+    padding: 10px;
+    background-color: #fff;
+    position: sticky;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    border-bottom: solid 1px #ccc;
 }
 
 #main_tools .jc-btn-group .md-button {
