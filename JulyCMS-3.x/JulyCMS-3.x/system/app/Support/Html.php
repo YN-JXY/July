@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Validator\Constraints\Length;
 
 class Html
 {
@@ -52,18 +53,48 @@ class Html
         return $this->extract('/src="(\/[^"]*?\.(?:jpg|jpeg|gif|png|webp))"/');
     }
 
-    // 提取视频链接
-    public function extractMpLinks()
+
+
+    // // 提取视频标题
+    public function extractMpTitle($video,$home)
     {
-        return $this->extract('/src="(\/[^"]*?\.mp4)"/');
+        $index = 0;
+
+        $title = [];
+        preg_match_all('/<source (.*?)>(.*?)<\/video>/is', $video,$title, PREG_PATTERN_ORDER);
+
+        $imgs = [];
+        $img = [];
+        preg_match_all('/poster="(\/[^"]*?\.(?:jpg|jpeg|gif|png|webp))"/', $video,$imgs, PREG_PATTERN_ORDER);
+        foreach($imgs[1] as $item){
+            $img[$index] = $home.'/'.ltrim($item, '\\/');
+            $index++;
+        }
+
+        $srcs = [];
+        $src = [];
+        $index = 0;
+        preg_match_all('/src="(\/[^"]*?\.mp4)"/', $video,$srcs,PREG_PATTERN_ORDER);
+        foreach($srcs[1] as $item){
+            $src[$index] = $home.'/'.ltrim($item, '\\/');
+            $index++;
+        }
+
+
+        $videos =  [
+            'src' => $src,
+            'title'=>$title[2],
+            'img'=>$img,
+        ];
+        return $videos;
     }
 
-    // 提取视频标题
-    public function extractMpTitleLinks()
-    {   
+    //获取整个视频的标签
+    public function extractMpLinks(){
         $matches = [];
-        preg_match_all('/\/>(.*?)<\/video>/',$this->html,$matches,PREG_PATTERN_ORDER);
-        return $matches[1];  
+        preg_match_all('/<video (.*?)>(.*?)<\/video>/is', $this->html,$matches, PREG_PATTERN_ORDER);
+        // Log::info($matches[0]);
+        return $matches[0];
     }
     /**
      * 提取 PDF 链接
