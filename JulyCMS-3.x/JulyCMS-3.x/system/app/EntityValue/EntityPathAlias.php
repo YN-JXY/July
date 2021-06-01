@@ -4,6 +4,9 @@ namespace App\EntityValue;
 
 use App\Entity\EntityBase;
 use App\Entity\EntityManager;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class EntityPathAlias extends ValueBase
 {
@@ -53,6 +56,7 @@ class EntityPathAlias extends ValueBase
      */
     public function scopeOfAlias($query, $alias)
     {
+
         $condition = [
             ['alias', '=', $alias, 'or'],
             ['entity_path', '=', trim($alias, '/'), 'or'],
@@ -65,7 +69,6 @@ class EntityPathAlias extends ValueBase
         // if (config('app.entity_path_accessible')) {
         //     $condition[] = ['path', '=', $alias, 'or'];
         // }
-
         return $query->where($condition);
     }
 
@@ -100,13 +103,17 @@ class EntityPathAlias extends ValueBase
      */
     public static function findEntity(string $alias, ?string $langcode = null)
     {
+
+
         /** @var \Illuminate\Database\Eloquent\Builder */
         $query = static::ofAlias($alias);
+
         if ($langcode) {
             $query->where('langcode', $langcode);
         }
 
-        if ($instance = $query->first()) {
+
+        if ($instance = DB::table('entity_path_aliases')->where('alias','/'.$alias)->first()) {
             return EntityManager::resolve($instance->entity_name, $instance->entity_id);
         }
         return null;
