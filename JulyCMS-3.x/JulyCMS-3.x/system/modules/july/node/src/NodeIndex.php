@@ -125,7 +125,6 @@ class NodeIndex extends ModelBase
 
             $node_id = $result->entity_id;
             $field_id = $result->field_id;
-
             $result = $result->toSearchResult($keywords);
             if (! isset($results[$node_id])) {
                 $results[$node_id] = [
@@ -134,7 +133,10 @@ class NodeIndex extends ModelBase
                 ];
             }
             $str = DB::table('node__h1')->where('entity_id',$node_id)->value('h1');
-
+            $ss = DB::table('entity_path_aliases')->where('entity_id',$node_id)->value('entity_id');
+            // foreach ($ss  as $key => $value) {
+                Log::info( $ss);
+            // }
             if(stripos($str,$key)!== false){
                 $index =  stripos($str,$key);
                 $length = mb_strlen($key);
@@ -145,6 +147,10 @@ class NodeIndex extends ModelBase
 
             $results[$node_id][$field_id] =  $result['content'];
             $results[$node_id]['weight'] +=  $result['weight'];
+            //过滤掉没有url的
+            if($ss != $node_id){
+                unset($results[$node_id]);
+            }
         }
 
         // 对结果排序
