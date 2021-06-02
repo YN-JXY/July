@@ -778,11 +778,13 @@ h2.jc-form-info-item {
 .jc-tree .jc-tree-node__type,
 .jc-tree .jc-tree-node__updated {
   padding: 0 15px;
+  max-width: 270px;
 }
 
 .jc-tree .jc-tree-node__updated {
-  width: 180px;
+  max-width: 120px;
   border-left: 1px solid #e0e0e0;
+  
 }
 
 .md-button.md-theme-default.md-fab:not([disabled]).jc-theme-light {
